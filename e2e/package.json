@@ -1,0 +1,15 @@
+{
+  "name": "zoom-clone-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser end-to-end checks for the main workflows (run against a freshly seeded database).",
+  "scripts": {
+    "core": "mkdir -p screenshots && node core-flows.mjs",
+    "extra": "mkdir -p screenshots && node extra-flows.mjs",
+    "auth": "mkdir -p screenshots && node auth-flows.mjs",
+    "all": "npm run core && npm run extra && npm run auth"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}
