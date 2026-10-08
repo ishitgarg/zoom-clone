@@ -5,7 +5,10 @@ import { cn } from "@/lib/cn";
 
 interface ToolbarButtonProps {
   icon: LucideIcon;
+  /** Short label under the icon, e.g. "Audio". */
   label: string;
+  /** What the button does, for screen readers and tooltips, e.g. "Mute". Defaults to `label`. */
+  actionLabel?: string;
   onClick: () => void;
   active?: boolean;
   /** Red slash style used for "muted"/"video off" states. */
@@ -22,7 +25,7 @@ interface ToolbarButtonProps {
 
 /** Icon-over-label button used in the in-meeting toolbar (Zoom style). */
 export const ToolbarButton = forwardRef<HTMLDivElement, ToolbarButtonProps>(function ToolbarButton(
-  { icon: Icon, label, onClick, active, danger, iconClassName, badge, disabled, onMenuClick, menuLabel, className, children },
+  { icon: Icon, label, actionLabel, onClick, active, danger, iconClassName, badge, disabled, onMenuClick, menuLabel, className, children },
   ref,
 ) {
   return (
@@ -31,8 +34,8 @@ export const ToolbarButton = forwardRef<HTMLDivElement, ToolbarButtonProps>(func
         type="button"
         onClick={onClick}
         disabled={disabled}
-        aria-label={label}
-        title={label}
+        aria-label={actionLabel ?? label}
+        title={actionLabel ?? label}
         aria-pressed={active}
         className="flex min-w-[56px] flex-col items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-room-text transition-colors hover:bg-room-hover disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[68px]"
       >

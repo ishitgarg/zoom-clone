@@ -1,6 +1,19 @@
 "use client";
 
-import { Check, Hand, MessageSquare, Mic, MicOff, MonitorUp, Smile, Users, Video, VideoOff } from "lucide-react";
+import {
+  Check,
+  CircleX,
+  Hand,
+  Heart,
+  MessageSquare,
+  Mic,
+  MicOff,
+  ShieldUser,
+  SquareArrowUp,
+  Users,
+  Video,
+  VideoOff,
+} from "lucide-react";
 import { useState } from "react";
 
 import { ToolbarPopover, popoverItem } from "@/components/meeting-room/Popover";
@@ -11,7 +24,7 @@ import { useMediaDevices } from "@/lib/meeting/useMediaDevices";
 
 export const REACTIONS = ["👏", "👍", "❤️", "😂", "😮", "🎉"] as const;
 
-type Menu = "audio" | "video" | "reactions" | "leave" | null;
+type Menu = "audio" | "video" | "reactions" | "host" | "leave" | null;
 
 interface Props {
   media: LocalMedia;
@@ -30,6 +43,7 @@ interface Props {
   onToggleHand: () => void;
   onLeave: () => void;
   onEndForAll: () => void;
+  onMuteAll: () => void;
   onDeviceError: (message: string) => void;
 }
 
@@ -65,7 +79,9 @@ export function MeetingToolbar(props: Props) {
             }}
           >
             <Check className={cn("size-4 shrink-0", device.deviceId === activeId ? "opacity-100" : "opacity-0")} />
-            <span className="truncate">{device.label || `${kind === "audioinput" ? "Microphone" : "Camera"} ${index + 1}`}</span>
+            <span className="truncate">
+              {device.label || `${kind === "audioinput" ? "Microphone" : "Camera"} ${index + 1}`}
+            </span>
           </button>
         ))}
       </div>
@@ -78,7 +94,8 @@ export function MeetingToolbar(props: Props) {
       <div className="flex items-center">
         <ToolbarButton
           icon={media.audioEnabled ? Mic : MicOff}
-          label={media.audioEnabled ? "Mute" : "Unmute"}
+          label="Audio"
+          actionLabel={media.audioEnabled ? "Mute" : "Unmute"}
           danger={!media.audioEnabled}
           onClick={props.onToggleAudio}
           onMenuClick={() => toggleMenu("audio")}
@@ -99,7 +116,8 @@ export function MeetingToolbar(props: Props) {
         </ToolbarButton>
         <ToolbarButton
           icon={media.videoEnabled ? Video : VideoOff}
-          label={media.videoEnabled ? "Stop Video" : "Start Video"}
+          label="Video"
+          actionLabel={media.videoEnabled ? "Stop Video" : "Start Video"}
           danger={!media.videoEnabled}
           onClick={props.onToggleVideo}
           onMenuClick={() => toggleMenu("video")}
@@ -119,7 +137,7 @@ export function MeetingToolbar(props: Props) {
           active={props.activePanel === "participants"}
           onClick={() => props.onTogglePanel("participants")}
           badge={
-            <span className="absolute -top-1.5 -right-3 min-w-[18px] rounded-full bg-room-hover px-1 text-center text-[10px] leading-[16px] font-semibold text-white">
+            <span className="absolute -top-1 -right-3.5 text-[12px] leading-none font-semibold text-white">
               {props.participantCount}
             </span>
           }
@@ -139,14 +157,14 @@ export function MeetingToolbar(props: Props) {
         />
         {props.canShareScreen && (
           <ToolbarButton
-            icon={MonitorUp}
+            icon={SquareArrowUp}
             label={sharing ? "Stop Share" : "Share"}
             onClick={props.onToggleShare}
-            iconClassName={cn("size-[26px] rounded-md p-1 text-white", sharing ? "bg-danger" : "bg-[#1f8f4e]")}
+            iconClassName={cn("size-[22px]", sharing && "text-[#ff5a5a]")}
             className="hidden sm:flex"
           />
         )}
-        <ToolbarButton icon={Smile} label="React" onClick={() => toggleMenu("reactions")} active={props.handRaised}>
+        <ToolbarButton icon={Heart} label="React" onClick={() => toggleMenu("reactions")} active={props.handRaised}>
           <ToolbarPopover open={menu === "reactions"} onClose={closeMenu}>
             <div className="flex gap-1 p-1">
               {REACTIONS.map((emoji) => (
@@ -176,17 +194,46 @@ export function MeetingToolbar(props: Props) {
             </button>
           </ToolbarPopover>
         </ToolbarButton>
+        {props.isHost && (
+          <ToolbarButton icon={ShieldUser} label="Host tools" onClick={() => toggleMenu("host")}>
+            <ToolbarPopover open={menu === "host"} onClose={closeMenu} className="w-60">
+              <p className="px-3 pt-1.5 pb-1 text-[12px] font-semibold text-room-muted">Host tools</p>
+              <button
+                type="button"
+                role="menuitem"
+                className={popoverItem}
+                disabled={props.participantCount < 2}
+                onClick={() => {
+                  closeMenu();
+                  props.onMuteAll();
+                }}
+              >
+                <MicOff className="size-4" /> Mute all participants
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={popoverItem}
+                onClick={() => {
+                  closeMenu();
+                  if (props.activePanel !== "participants") props.onTogglePanel("participants");
+                }}
+              >
+                <Users className="size-4" /> Manage participants
+              </button>
+            </ToolbarPopover>
+          </ToolbarButton>
+        )}
       </div>
 
       {/* Right: leave */}
       <div className="relative flex items-center pr-1">
-        <button
-          type="button"
+        <ToolbarButton
+          icon={CircleX}
+          label={props.isHost ? "End" : "Leave"}
           onClick={() => toggleMenu("leave")}
-          className="h-9 rounded-lg bg-danger px-3.5 text-[13px] font-semibold text-white hover:bg-danger-hover sm:px-4"
-        >
-          {props.isHost ? "End" : "Leave"}
-        </button>
+          iconClassName="size-[24px] text-[#ff4d4d]"
+        />
         <ToolbarPopover open={menu === "leave"} onClose={closeMenu} align="right" className="w-64 p-3">
           {props.isHost && (
             <button
@@ -202,13 +249,17 @@ export function MeetingToolbar(props: Props) {
             onClick={props.onLeave}
             className={cn(
               "h-10 w-full rounded-lg font-semibold",
-              props.isHost ? "bg-room-hover text-white hover:bg-[#3d3d3d]" : "bg-danger text-white hover:bg-danger-hover",
+              props.isHost
+                ? "bg-room-hover text-white hover:bg-[#3d3d3d]"
+                : "bg-danger text-white hover:bg-danger-hover",
             )}
           >
             Leave meeting
           </button>
           {props.isHost && (
-            <p className="mt-2 text-center text-[11px] text-room-muted">If you leave, another participant becomes host.</p>
+            <p className="mt-2 text-center text-[11px] text-room-muted">
+              If you leave, another participant becomes host.
+            </p>
           )}
         </ToolbarPopover>
       </div>

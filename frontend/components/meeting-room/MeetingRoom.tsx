@@ -227,6 +227,7 @@ export function MeetingRoom({ meeting, session, initialSelf, media, offerScreenS
         onToggleHand={() => void updateSelf({ hand_raised: !self.hand_raised })}
         onLeave={presence.leave}
         onEndForAll={presence.endForAll}
+        onMuteAll={presence.muteAll}
         onDeviceError={(message) => toast(message, "error")}
       />
 

@@ -4,6 +4,7 @@ import { Hand, MicOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { StreamVideo } from "@/components/meeting-room/MediaElements";
+import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/cn";
 import { useReactionBurst } from "@/lib/meeting/useReactionBurst";
 import type { Participant } from "@/types/api";
@@ -52,15 +53,14 @@ export function VideoTile({
       {showVideo && stream ? (
         <StreamVideo stream={stream} mirrored={mirrored} className={contain ? "object-contain bg-black" : undefined} />
       ) : (
-        <div className="grid size-full place-items-center px-3">
-          <span
+        <div className="grid size-full place-items-center">
+          <Avatar
+            name={participant.display_name}
             className={cn(
-              "max-w-full truncate text-center font-semibold text-white",
-              compact ? "text-sm" : "text-[clamp(18px,3.2vw,40px)]",
+              "font-normal",
+              compact ? "size-10 text-lg" : "size-[clamp(56px,9vw,120px)] text-[clamp(24px,4vw,52px)]",
             )}
-          >
-            {participant.display_name}
-          </span>
+          />
         </div>
       )}
 

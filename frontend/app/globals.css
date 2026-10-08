@@ -3,7 +3,8 @@
 /* Design tokens inspired by Zoom's visual language: bright blue primary, orange "New meeting",
    neutral greys, compact 14px body text and soft 8–16px radii. */
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* System UI font, like the Zoom app itself: Segoe UI on Windows, San Francisco on macOS. */
+  --font-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --color-brand: #0b5cff;
   --color-brand-hover: #0a50e0;
@@ -28,10 +29,10 @@
   --color-success: #23a55a;
 
   /* In-meeting dark theme */
-  --color-room: #121212;
-  --color-room-tile: #242424;
-  --color-room-bar: #1c1c1c;
-  --color-room-hover: #333333;
+  --color-room: #000000;
+  --color-room-tile: #232425;
+  --color-room-bar: #000000;
+  --color-room-hover: #2c2c2e;
   --color-room-line: #2e2e2e;
   --color-room-text: #e6e6e6;
   --color-room-muted: #a3a3a3;

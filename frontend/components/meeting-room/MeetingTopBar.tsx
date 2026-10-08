@@ -50,41 +50,7 @@ export function MeetingTopBar({ meeting, self, hostName, view, onViewChange, con
 
   return (
     <div className="relative z-20 flex h-11 shrink-0 items-center justify-between px-3 text-room-text">
-      <div ref={ref} className="relative flex min-w-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setInfoOpen((v) => !v)}
-          aria-label="Meeting information"
-          aria-expanded={infoOpen}
-          className="grid size-7 place-items-center rounded-md text-[#3ddc84] hover:bg-room-hover"
-        >
-          <ShieldCheck className="size-[18px]" />
-        </button>
-        <span className="truncate text-[13px] font-medium">{meeting.title}</span>
-        <span className="text-[12px] text-room-muted tabular-nums" suppressHydrationWarning>
-          {elapsed(meeting.started_at, now)}
-        </span>
-        {infoOpen && (
-          <div className="absolute top-9 left-0 w-[min(340px,calc(100vw-24px))] animate-pop-in rounded-xl border border-room-line bg-[#2a2a2a] p-4 text-[13px] shadow-pop">
-            <p className="mb-3 text-[15px] font-semibold text-white">{meeting.title}</p>
-            <dl className="grid grid-cols-[100px_1fr] gap-x-2 gap-y-2">
-              <dt className="text-room-muted">Meeting ID</dt>
-              <dd>{formatMeetingId(meeting.meeting_id)}</dd>
-              <dt className="text-room-muted">Host</dt>
-              <dd>{hostName}</dd>
-              <dt className="text-room-muted">Invite link</dt>
-              <dd className="min-w-0">
-                <span className="block truncate">{meeting.invite_url}</span>
-                <button type="button" onClick={copyLink} className="mt-1 inline-flex items-center gap-1 font-semibold text-[#5c9dff] hover:underline">
-                  <Copy className="size-3.5" /> Copy link
-                </button>
-              </dd>
-              <dt className="text-room-muted">Participant ID</dt>
-              <dd>{self.id}</dd>
-            </dl>
-          </div>
-        )}
-      </div>
+      <span className="min-w-0 truncate text-[14px] text-white">{meeting.title}</span>
 
       <div className="flex items-center gap-2">
         {connectionLost && (
@@ -92,6 +58,45 @@ export function MeetingTopBar({ meeting, self, hostName, view, onViewChange, con
             Reconnecting...
           </span>
         )}
+        <div ref={ref} className="relative">
+          <button
+            type="button"
+            onClick={() => setInfoOpen((v) => !v)}
+            aria-label="Meeting information"
+            aria-expanded={infoOpen}
+            className="grid size-7 place-items-center rounded-md text-[#3ddc84] hover:bg-room-hover"
+          >
+            <ShieldCheck className="size-[18px]" />
+          </button>
+          {infoOpen && (
+            <div className="absolute top-9 right-0 w-[min(340px,calc(100vw-24px))] animate-pop-in rounded-xl border border-room-line bg-[#2a2a2a] p-4 text-[13px] shadow-pop">
+              <p className="mb-3 text-[15px] font-semibold text-white">{meeting.title}</p>
+              <dl className="grid grid-cols-[100px_1fr] gap-x-2 gap-y-2">
+                <dt className="text-room-muted">Meeting ID</dt>
+                <dd>{formatMeetingId(meeting.meeting_id)}</dd>
+                <dt className="text-room-muted">Host</dt>
+                <dd>{hostName}</dd>
+                <dt className="text-room-muted">Invite link</dt>
+                <dd className="min-w-0">
+                  <span className="block truncate">{meeting.invite_url}</span>
+                  <button
+                    type="button"
+                    onClick={copyLink}
+                    className="mt-1 inline-flex items-center gap-1 font-semibold text-[#5c9dff] hover:underline"
+                  >
+                    <Copy className="size-3.5" /> Copy link
+                  </button>
+                </dd>
+                <dt className="text-room-muted">Duration</dt>
+                <dd className="tabular-nums" suppressHydrationWarning>
+                  {elapsed(meeting.started_at, now)}
+                </dd>
+                <dt className="text-room-muted">Participant ID</dt>
+                <dd>{self.id}</dd>
+              </dl>
+            </div>
+          )}
+        </div>
         <div ref={viewRef} className="relative">
           <button
             type="button"
@@ -104,7 +109,10 @@ export function MeetingTopBar({ meeting, self, hostName, view, onViewChange, con
             View
           </button>
           {viewOpen && (
-            <div role="menu" className="absolute top-9 right-0 w-44 animate-pop-in rounded-xl border border-room-line bg-[#2a2a2a] p-1.5 text-[13px] shadow-pop">
+            <div
+              role="menu"
+              className="absolute top-9 right-0 w-44 animate-pop-in rounded-xl border border-room-line bg-[#2a2a2a] p-1.5 text-[13px] shadow-pop"
+            >
               {(["speaker", "gallery"] as const).map((option) => (
                 <button
                   key={option}

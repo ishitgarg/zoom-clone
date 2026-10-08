@@ -13,12 +13,12 @@ A functional clone of the Zoom web experience: create instant meetings, join by 
 ### Core (assignment requirements)
 | Feature | What it does |
 |---|---|
-| **Dashboard** | Laid out like the Zoom Workplace app: left navigation rail (Home / Meetings / Settings; a bottom tab bar on phones), top bar with profile, a large live clock and date, Zoom's four big tiles — **New meeting** (with a *Start with video* dropdown), **Join**, **Schedule**, **Share screen**, then a calendar-style card with **Upcoming meetings** (grouped by day) and a **Recent meetings** list — all loaded from the database. |
+| **Dashboard** | Laid out like the Zoom Workplace app: left navigation rail (Home / Meetings / Settings; a bottom tab bar on phones), top bar with profile, a large live clock and date, Zoom's four big tiles — **New meeting** (with a *Start with video* dropdown), **Join**, **Schedule**, **Share screen**, then **Upcoming meetings** shown as Zoom-style meeting cards (title, "In 11 min" or the date, time range, host, **Start**) and a **Recent meetings** list. The brief asks for Recent meetings, although Zoom's own home screen doesn't have it. Everything is loaded from the database. |
 | **Instant meeting** | *New meeting* → backend generates a unique 10-digit Meeting ID, stores the meeting, returns an invite link (`/meeting/<id>`) → you are taken straight into the room as host. |
 | **Join meeting** | Join by Meeting ID (`8123456789`, `812 345 6789`, `812-345-6789`) **or** by pasting an invite link. A display name is required. The meeting is validated on the server; unknown IDs show *"Meeting not found. Please check the meeting ID and try again."* |
 | **Invite link** | Opening `/meeting/<id>` validates the meeting, shows a camera/mic preview and asks for your name, then joins. |
 | **Schedule meeting** | Topic, description, date, time (15-min steps), duration (hours + minutes, 15 min–24 h), time-zone display. Validated client- and server-side, stored with a proper UTC `DATETIME`, link generated automatically, appears in Upcoming immediately. |
-| **Meeting room** | Meeting info (ID, host, invite link), gallery / speaker view, your name on every tile, mute/unmute, start/stop video, participants panel, chat, leave/end, and a "Waiting for others to join" empty state. |
+| **Meeting room** | Zoom-style black meeting window: meeting info (ID, host, invite link, duration), **View** menu (speaker / gallery), your name on every tile and an avatar circle when the camera is off. Toolbar: **Audio · Video · Participants · Chat · Share · React · Host tools · End/Leave**, plus a "Waiting for others to join" empty state. |
 
 ### Bonus features (all three from the brief)
 - **User authentication (Login/Signup):** optional *Sign Up Free* / *Sign In* pages. Signed-in users get their own dashboard, meetings and host rights; without signing in the app uses the default demo user, exactly as the brief requires ("assume a default user is logged in"). Passwords are hashed (PBKDF2-SHA256 with salt); sign-ins are random tokens stored only as SHA-256 hashes and expire after 30 days.
@@ -45,7 +45,7 @@ A functional clone of the Zoom web experience: create instant meetings, join by 
 | **In-meeting chat** | **Sign in** |
 | ![Chat](docs/screenshots/chat.png) | ![Sign in](docs/screenshots/sign-in.png) |
 
-Also in [`docs/screenshots/`](docs/screenshots): the phone layout and the "meeting not found" page. The green video in the screenshots is Chrome's built-in fake test camera, used by the automated browser tests.
+Also in [`docs/screenshots/`](docs/screenshots): the meeting room with the camera off, the phone layout and the "meeting not found" page. The green video in the screenshots is Chrome's built-in fake test camera, used by the automated browser tests.
 
 ---
 
@@ -227,7 +227,7 @@ The e2e scripts launch Chromium with a fake camera/microphone and drive two or t
 3. **Join by ID:** Home → **Join** → enter `812 345 6789` (seeded) or any meeting ID / link, plus your name.
 4. **Schedule:** Home → **Schedule** (or the Meetings tab +) → fill in the form → **Save**. The confirmation shows the link; the meeting appears in Upcoming. Use **Start** to begin it as host.
 5. **Share screen:** Home → **Share screen** → enter a meeting ID → you join and are asked to pick a screen to share.
-6. **In the meeting:** Mute/Stop Video (chevrons pick devices), Participants (host: Mute All / Mute / Remove), Chat, Share, React (emoji / Raise Hand), **View** (Speaker / Gallery), **End** (host: End for all / Leave) or **Leave**.
+6. **In the meeting:** **Audio** / **Video** (the ^ chevrons pick devices), Participants (host: Mute All / Mute / Remove), Chat, Share, React (emoji / Raise Hand), **Host tools** (Mute all participants / Manage participants), **View** (Speaker / Gallery), **End** (host: End meeting for all / Leave) or **Leave**.
 7. **Your own account (optional):** **Sign Up Free** (top right) → you get your own empty dashboard; meetings you create are yours. **Sign Out** from the profile menu returns to the demo user.
 
 ### Testing with two people on one laptop
@@ -264,7 +264,7 @@ Camera/microphone access requires HTTPS in production (both Vercel and Render pr
 - **Lifecycle:** instant meetings are `live` on creation; scheduled meetings become `live` when someone joins; a meeting becomes `ended` when the last person leaves or the host ends it. Joining an ended meeting re-opens it (like a reusable Zoom meeting ID); cancelled meetings cannot be joined. A scheduled meeting that has already been held moves from Upcoming to Recent.
 - **Recent meetings** = meetings the user hosted or attended (as the logged-in account) that have started.
 - **Chat** history is visible from the moment you join (like Zoom).
-- Brand: the logo is an original mark — Zoom's trademarked logo is intentionally not reused.
+- **Look and feel:** layout, colours, cards and meeting controls follow the current Zoom Workplace app. Like Zoom, the UI uses the operating system's font (Segoe UI on Windows, San Francisco on macOS). The logo is an original mark; Zoom's trademarked logo is intentionally not reused.
 
 ## 9. Known limitations
 - **WebRTC mesh + public STUN only:** fine for small meetings (each browser connects to every other). Strict corporate networks/symmetric NATs need a TURN server, and large meetings would need an SFU (e.g. LiveKit, mediasoup). If media can't connect, presence/chat/controls still work and tiles show the participant's name.

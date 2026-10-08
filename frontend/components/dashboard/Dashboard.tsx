@@ -9,12 +9,13 @@ import { RecentMeetingsCard } from "@/components/dashboard/RecentMeetingsCard";
 import { UpcomingMeetingsCard } from "@/components/dashboard/UpcomingMeetingsCard";
 import { JoinMeetingDialog } from "@/components/meetings/JoinMeetingDialog";
 import { ScheduleMeetingDialog } from "@/components/meetings/ScheduleMeetingDialog";
-import { formatTime } from "@/lib/format";
 import { useMeetingActions } from "@/lib/hooks/useMeetingActions";
 import { useMeetingLists } from "@/lib/hooks/useMeetingLists";
 import { useNow } from "@/lib/hooks/useNow";
 
 const fullDate = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+// Zoom shows the home clock with a leading zero ("02:19 AM").
+const clockTime = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
 
 /** Home screen laid out like Zoom Workplace: clock, action tiles, then the meetings cards. */
 export function Dashboard() {
@@ -29,7 +30,7 @@ export function Dashboard() {
     <main className="mx-auto w-full max-w-[760px] px-4 pt-8 pb-10 sm:px-6 sm:pt-12">
       <div className="text-center" suppressHydrationWarning>
         <p className="text-[40px] leading-tight font-bold tracking-tight text-ink tabular-nums sm:text-[48px]">
-          {now ? formatTime(now) : " "}
+          {now ? clockTime.format(now) : " "}
         </p>
         <p className="mt-1 text-[16px] text-muted sm:text-[18px]">{now ? fullDate.format(now) : " "}</p>
       </div>

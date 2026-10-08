@@ -4,11 +4,10 @@ import { Plus } from "lucide-react";
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import { EmptyCalendarIllustration } from "@/components/dashboard/EmptyIllustration";
-import { MeetingActionsMenu } from "@/components/meetings/MeetingActionsMenu";
+import { MeetingCard } from "@/components/dashboard/MeetingCard";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
-import { formatMeetingId, formatRelativeDay, formatTime, meetingTimeRange } from "@/lib/format";
 import type { useMeetingActions } from "@/lib/hooks/useMeetingActions";
 import { useNow } from "@/lib/hooks/useNow";
 import type { Meeting } from "@/types/api";
@@ -24,14 +23,7 @@ interface Props {
 
 /** Zoom's home calendar card: upcoming meetings grouped by day. */
 export function UpcomingMeetingsCard({ meetings, loading, error, onRetry, onSchedule, actions }: Props) {
-  const now = useNow(60_000);
-
-  const groups = new Map<string, Meeting[]>();
-  for (const meeting of meetings) {
-    const range = meetingTimeRange(meeting);
-    const label = range && now ? formatRelativeDay(range.start, now) : "";
-    groups.set(label, [...(groups.get(label) ?? []), meeting]);
-  }
+  const now = useNow(30_000);
 
   return (
     <DashboardCard
@@ -70,46 +62,14 @@ export function UpcomingMeetingsCard({ meetings, loading, error, onRetry, onSche
             </button>
           </div>
         ) : (
-          [...groups.entries()].map(([day, items]) => (
-            <div key={day} className="mb-1">
-              <p className="px-3 pt-2 pb-1 text-[12px] font-semibold tracking-wide text-muted uppercase">{day}</p>
-              <ul>
-                {items.map((meeting) => (
-                  <UpcomingItem key={meeting.meeting_id} meeting={meeting} actions={actions} />
-                ))}
-              </ul>
-            </div>
-          ))
+          <ul className="space-y-3 p-2">
+            {meetings.map((meeting) => (
+              <MeetingCard key={meeting.meeting_id} meeting={meeting} variant="upcoming" now={now} actions={actions} />
+            ))}
+          </ul>
         )}
       </div>
     </DashboardCard>
-  );
-}
-
-function UpcomingItem({ meeting, actions }: { meeting: Meeting; actions: Props["actions"] }) {
-  const range = meetingTimeRange(meeting);
-  const live = meeting.status === "live";
-  return (
-    <li className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-canvas">
-      <div className="w-[76px] shrink-0 text-[13px] leading-tight" suppressHydrationWarning>
-        <p className="font-semibold text-ink">{range ? formatTime(range.start) : ""}</p>
-        <p className="text-muted">{range ? formatTime(range.end) : ""}</p>
-      </div>
-      <span className={live ? "h-10 w-[3px] rounded-full bg-success" : "h-10 w-[3px] rounded-full bg-brand"} aria-hidden />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-semibold" title={meeting.title}>
-          {meeting.title}
-        </p>
-        <p className="truncate text-[12px] text-muted">
-          {live && <span className="mr-1.5 font-semibold text-success">● In progress</span>}
-          Meeting ID: {formatMeetingId(meeting.meeting_id)}
-        </p>
-      </div>
-      <Button size="sm" variant={live ? "primary" : "secondary"} onClick={() => actions.openMeeting(meeting)}>
-        {actions.isHost(meeting) ? "Start" : "Join"}
-      </Button>
-      <MeetingActionsMenu meeting={meeting} actions={actions} />
-    </li>
   );
 }
 
