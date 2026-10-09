@@ -6,6 +6,10 @@ A functional clone of the Zoom web experience: create instant meetings, join by 
 - **Backend:** Python 3.12, FastAPI, SQLAlchemy 2, Pydantic 2
 - **Database:** SQLite (own schema, seeded with sample data)
 
+**Live demo:** https://zoom-clone-swart-three.vercel.app (frontend on Vercel) · API: https://zoom-clone-api-production-426b.up.railway.app/api/health (backend on Railway)
+
+> No sign-in is needed: the app opens as the default user **Alex Morgan**. To try a real call, start a meeting and open the invite link on a second device or in another browser.
+
 ---
 
 ## 1. Features
@@ -240,20 +244,24 @@ Open the invite link in an **Incognito window** (or a second browser) and join w
 
 ## 7. Deployment
 
-The frontend and backend deploy separately.
+The frontend and backend deploy separately. The live demo runs the backend on **Railway** and the frontend on **Vercel**.
 
-### Backend → Render (blueprint included)
-1. Push this repo to GitHub (public).
-2. In Render: **New → Blueprint**, select the repo; it reads `render.yaml` (root dir `backend`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, health check `/api/health`).
-3. After the frontend is deployed, set `FRONTEND_URL=https://<your-app>.vercel.app` and `CORS_ORIGINS=https://<your-app>.vercel.app` and redeploy.
-4. SQLite on the free plan lives on an ephemeral disk, so `SEED_ON_STARTUP=true` re-seeds after each restart. For persistence attach a Render Disk at `/var/data` and set `DATABASE_URL=sqlite:////var/data/zoom_clone.db` (Railway volumes or a small VM work the same way).
+### Backend → Railway (used for the live demo)
+1. **New Project → Deploy from GitHub repo** → select this repo.
+2. Service **Settings**: Root Directory `backend`; Custom Start Command `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+3. **Variables**: `SEED_ON_STARTUP=true`, `FRONTEND_URL=https://<your-app>.vercel.app`, `CORS_ORIGINS=https://<your-app>.vercel.app` (no trailing slash).
+4. **Settings → Networking → Generate Domain**, then check `https://<your-api>/api/health` returns `{"status":"ok"}`.
+
+SQLite lives on the container's ephemeral disk, so `SEED_ON_STARTUP=true` re-seeds the sample data after each redeploy/restart (data created on the live site is reset then). For persistence, attach a volume and point `DATABASE_URL` at it, e.g. `sqlite:////data/zoom_clone.db`.
+
+**Alternative: Render.** `render.yaml` is a ready-made blueprint (**New → Blueprint**): same root directory, start command and variables, plus a health check on `/api/health`.
 
 ### Frontend → Vercel
-1. **Import Project** → select the repo → **Root Directory: `frontend`** (framework auto-detected).
-2. Environment variable: `NEXT_PUBLIC_API_URL=https://<your-api>.onrender.com`.
-3. Deploy, then update the backend's `FRONTEND_URL` / `CORS_ORIGINS` as above.
+1. **Add New → Project** → select the repo → **Root Directory: `frontend`** (Next.js is auto-detected).
+2. Environment variable (type *Config*, all environments): `NEXT_PUBLIC_API_URL=https://<your-api>` (no trailing slash). It is inlined at build time, so redeploy after changing it.
+3. Deploy, then set the backend's `FRONTEND_URL` / `CORS_ORIGINS` to the Vercel URL as above.
 
-Camera/microphone access requires HTTPS in production (both Vercel and Render provide it).
+Camera/microphone access requires HTTPS in production (Vercel and Railway both provide it).
 
 ---
 
